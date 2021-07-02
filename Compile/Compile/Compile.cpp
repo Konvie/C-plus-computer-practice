@@ -1,5 +1,4 @@
 #include<iostream>
-#include<cstdio>
 #include<string>
 #include<sstream>
 #include<fstream> 
@@ -24,24 +23,25 @@ void initial(vector<string>& text)
 	}
 	infile.close();							//关闭文件
 }
-void showtext(vector<string>& text)
+void ShowText(vector<string>& text)
 {
 	int m, n;
-	scanf("%d%d", &m, &n);
-	printf("第%d行到第%d行的文本为：\n", m, n);
+	cin >> m >> n;
+	cout<< "第" << m << "行到第" << n << "行的文本为:" <<endl;
 	for (int i = m - 1; i < n; i++)
 		cout << text[i] << endl;
-
 }
-void insert(vector<string>& text)
+void Insert(vector<string>& text)
 {
 	int m;
-	scanf("%d\n", &m);
+	cin >> m;
+	cout << "换行后输入^z完成编辑" << endl;
 	int t = m;
 	string temp;
+	getline(cin, temp);
 	while (getline(cin, temp))
 	{
-		if (temp == "^Z")
+		if (temp == "^z")
 			break;
 		text.insert(text.begin() + t, temp);
 		t++;
@@ -52,7 +52,7 @@ void insert(vector<string>& text)
 void Delete(vector<string>& text)
 {
 	int m, n;
-	scanf("%d%d", &m, &n);
+	cin >> m >> n;
 	text.erase(text.begin() + m - 1, text.begin() + n);
 	for (int i = 0; i < text.size(); i++)
 		cout << text[i] << endl;
@@ -60,13 +60,16 @@ void Delete(vector<string>& text)
 void Replace(vector<string>& text)
 {
 	int m, n;
-	scanf("%d%d\n", &m, &n);
+	cin >> m >> n;
+	cout << "换行后输入^z完成编辑" << endl;
 	int t = m - 1;
 	text.erase(text.begin() + t, text.begin() + n);
 	string temp;
+	
+	getline(cin, temp);
 	while (getline(cin, temp))
 	{
-		if (temp == "^Z")
+		if (temp == "^z")
 			break;
 		text.insert(text.begin() + t, temp);
 		t++;
@@ -85,25 +88,27 @@ void SaveQuit(vector<string>& text)
 	for (int i = 0; i < text.size(); i++)
 		outfile << text[i] << endl;
 	outfile.close();
+	exit(0);
 }
 void Quit(vector<string>& text)
 {
 	initial(text);
+	exit(0);
 }
 int main()
 {	
 	vector<string>text;
-	initial(text);		//从输入文件中读取数据
+	initial(text);							//从输入文件中读取数据
 	for (int i = 0; i < text.size(); i++)
 		cout << text[i] << endl;
-	string command;		//编辑命令处理
+	string command;							//编辑命令处理
 	cout << "请输入编辑命令：" << endl;
-	while (cin >> command)	//获取编辑命令
+	while (cin >> command)					//获取编辑命令
 	{
 		if (command == "*L")
-			showtext(text);
-		if (command == "*l")
-			insert(text);
+			ShowText(text);
+		if (command == "*I")
+			Insert(text);
 		if (command == "*D")
 			Delete(text);
 		if (command == "*R")

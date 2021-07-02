@@ -20,7 +20,7 @@ private:
 	long m_key;					//文档中单词数
 	long m_keycount;			//保留字计数
 	long m_nokeycount;			//非保留字计数
-	int m_keynum;
+	int m_keynum;				//需要匹配的保留字个数
 	int m_time;					//扫描文件次数
 };
 
@@ -31,81 +31,47 @@ void KeyWord::Display() {
 }
 void KeyWord::Search() {
 	fstream file;		//handle
-	file.open("C:\\Users\\lenovo\\Desktop\\" + m_filename + ".txt");		//打开文件
-	ofstream record("C:\\Users\\lenovo\\Desktop\\keywords.txt");			//文件写入,记录保留字计数、文档扫描次数和非保留字计数
+	file.open(/*"C:\\Users\\lenovo\\Desktop\\" +*/ m_filename + ".txt");		//打开文件
+	ofstream record1("C:\\Users\\lenovo\\Desktop\\keyfile.txt");			//文件写入,keyfile用来记录保留字计数、文档扫描次数和非保留字计数
 
 	char str[2000];															//将文档内容存入数组str中
-	int flag = 0;
+	int flag = 0;															//用于确定单词的起始位置
 
-	while (file.getline(str, 2000))
-	{
-		for (int i = 0; i < strlen(str); i++) {
-			if (str[i] == ' ' || str[i] == '.' || str[i] == ',' || str[i] == '?' || str[i] == '!') {
-				m_key++;
-				char* word = new char[i + 1 - flag];
-				for (int j = flag; j < i; j++) {
-					word[j - flag] = str[j];
-				}
-				word[i - flag] = '\0';
-				string st = string(word);
-
-				if (st == m_keyword[0]) {
-					m_keycount++;
-					flag = i + 1;
-				}
-				else {
-					m_nokeycount++;
-					flag = i + 1;
-				}
-				delete[]word;
-
-			}
-		}
-		m_time++;
-		flag = 0;
-	}
-	file.clear();						//清除文件流属性状态
-	file.seekg(0, ios::beg);			//回到文档首部
-	m_nokeycount = m_nokeycount + m_keycount;
-
-	for (int w = 1; w < m_keynum; w++) {
-
+	for (int w = 0; w < m_keynum; w++) {
 		while (file.getline(str, 2000))
 		{
 			for (int i = 0; i < strlen(str); i++) {
 				if (str[i] == ' ' || str[i] == '.' || str[i] == ',' || str[i] == '?' || str[i] == '!') {
-
-					char* word = new char[i + 1 - flag];
+					m_key++;									//记录单词数
+					char* word = new char[i + 1 - flag];		//为word数组分配空间
 					for (int j = flag; j < i; j++) {
-						word[j - flag] = str[j];
+						word[j - flag] = str[j];				//将单词存入word数组
 					}
-					word[i - flag] = '\0';
+					word[i - flag] = '\0';						//字符串的结尾符，以便转换为字符串格式	
 					string st = string(word);
 
 					if (st == m_keyword[w]) {
-						m_keycount++;
+						m_keycount++;							//若相同，则保留字计数++
 						flag = i + 1;
 					}
 					else {
 						flag = i + 1;
 					}
-					delete[]word;
-
+					delete[]word;								//释放word数组的内存
 				}
 			}
-
 			m_time++;
 			flag = 0;
-
 		}
-		file.clear();
-		file.seekg(0, ios::beg);
+		file.clear();											//清除文件流属性状态
+		file.seekg(0, ios::beg);								//回到文档首部
 	}
+	m_key = m_key / m_time;										//由于共扫描了m_time次，所以总数应该除以次数得出单词总数
+	m_nokeycount = m_key - m_keycount;							//计算非保留字计数
 
-	m_nokeycount = m_nokeycount - m_keycount;
 	cout << "一共有" << m_key << "个单词" << endl;
 	cout << "其中有" << m_keycount << "个单词匹配" << ",有" << m_nokeycount << "个单词不匹配。" << "一共扫描" << m_time << "次文件";
-	record << "关键字出现次数：" << m_keycount << "  非关键字出现次数 " << m_nokeycount << "一共扫描" << m_time << "次文件" << endl;
+	record1 << "关键字出现次数：" << m_keycount << " 非关键字出现次数：" << m_nokeycount << " 一共扫描" << m_time << "次文件" << endl;
 
 }
 //将数据录入类中
@@ -143,17 +109,17 @@ int main() {
 	cout << "输入要查找的关键字个数(最大为10)：";
 	cin >> count;
 
-	string* keywod = new string[count];
+	string* getkey = new string[count];				//指针数组实现每一个“元素”为一个字符串，实际上相当于二维数组
 	for (int i = 0; i < count; i++) {
 		cout << "输入第" << i + 1 << "个关键字" << endl;
-		cin >> keywod[i];
+		cin >> getkey[i];
 	}
-	ofstream fot("C:\\Users\\lenovo\\Desktop\\keyfile.txt", ios::in);
+	ofstream record2("C:\\Users\\lenovo\\Desktop\\keyword.txt"/*, ios::in*/);	//keyword表单用来记录保留字
 	for (int i = 0; i < count; i++) {
-		fot << keywod[i] << "  ";
+		record2 << getkey[i] << "  ";
 	}
 	KeyWord KeySearch;
-	KeySearch.SetData(keywod, file1, 0, 0, 0, count, time1);
+	KeySearch.SetData(getkey, file1, 0, 0, 0, count, time1);
 	KeySearch.Search();
 	return 0;
 }
